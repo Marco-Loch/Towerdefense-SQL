@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css'
 import Login from './components/login/Login'
 import Register from './components/register/Register';
+import GamePage from './components/game/Game-Page';
 
 function App() {
   const [userId, setUserId] = useState(null);
@@ -11,6 +12,7 @@ function App() {
     const storedUserId = localStorage.getItem('user_id');
     if (storedUserId) {
       setUserId(storedUserId);
+      setMode('game');
     }
   }, []);
 
@@ -32,31 +34,13 @@ function App() {
   };
 
   const renderContent = () => {
-    if (userId) {
-      return (
-        <div>
-          <h1>Willkommen zurück!</h1>
-          <p>Du bist angemeldet mit der User-ID: {userId}</p>
-          <button onClick={handleLogout}>Abmelden</button>
-          {/* Hier die Haupt-Spielkomponente rendern */}
-          {/* <GamePage userId={userId} /> */}
-        </div>
-      );
-    }
-
     switch (mode) {
+      case 'game':
+        return <GamePage userId={userId} onLogout={handleLogout} />;
       case 'login':
         return <Login onLoginSuccess={handleLoginSuccess} />;
       case 'register':
         return <Register onLoginSuccess={handleLoginSuccess} />;
-      case 'game':
-        return (
-          <div>
-            <h1>Spiele als Gast!</h1>
-            <button onClick={() => setMode('welcome')}>Zurück</button>
-            {/* Hier die Haupt-Spielkomponente für Gäste rendern */}
-          </div>
-        );
       case 'welcome':
       default:
         return (
