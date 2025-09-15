@@ -1,12 +1,23 @@
 <?php
-// Setze CORS-Header, damit dein React-Frontend zugreifen kann
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
+// Preflight-Anfrage behandeln und das Skript beenden
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Hier kann die JSON-Header-Definition erfolgen, da die OPTIONS-Anfrage jetzt abgefangen wurde.
+header("Content-Type: application/json; charset=UTF-8");
+
+// PHP-Fehler anzeigen
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // Datenbank-Zugangsdaten von All-Inkl.com
-$servername = "w020a54e.kasserver.com";
+$servername = "localhost";
 $username = "d044c145";
 $password = "D1h8D1h8D1h8!";
 $dbname = "d044c145";
@@ -54,3 +65,4 @@ if ($insertUser->execute()) {
 
 $conn->close();
 ?>
+

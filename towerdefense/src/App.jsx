@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useState, useEffect } from 'react';
 import './App.css'
+import Login from './components/login/Login'
+import Register from './components/register/Register';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [userId, setUserId] = useState(null);
+  const [mode, setMode] = useState('welcome');
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('user_id');
+    if (storedUserId) {
+      setUserId(storedUserId);
+    }
+  }, []);
+
+  const handleLoginSuccess = (id) => {
+    setUserId(id);
+    setMode('game');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_id');
+    setUserId(null);
+    setMode('welcome');
+  };
+
+  const handleGuestLogin = () => {
+    setMode('game');
+    setUserId(null); 
+    localStorage.removeItem('user_id');
+  };
+
+  const renderContent = () => {
+    if (userId) {
+      return (
+        <div>
+          <h1>Willkommen zurück!</h1>
+          <p>Du bist angemeldet mit der User-ID: {userId}</p>
+          <button onClick={handleLogout}>Abmelden</button>
+          {/* Hier die Haupt-Spielkomponente rendern */}
+          {/* <GamePage userId={userId} /> */}
+        </div>
+      );
+    }
+
+    switch (mode) {
+      case 'login':
+        return <Login onLoginSuccess={handleLoginSuccess} />;
+      case 'register':
+        return <Register onLoginSuccess={handleLoginSuccess} />;
+      case 'game':
+        return (
+          <div>
+            <h1>Spiele als Gast!</h1>
+            <button onClick={() => setMode('welcome')}>Zurück</button>
+            {/* Hier die Haupt-Spielkomponente für Gäste rendern */}
+          </div>
+        );
+      case 'welcome':
+      default:
+        return (
+          <div>
+            <h1>Willkommen!</h1>
+            <p>Bitte wähle eine Option:</p>
+            <button onClick={() => setMode('login')}>Anmelden</button>
+            <button onClick={() => setMode('register')}>Registrieren</button>
+            <button onClick={handleGuestLogin}>Als Gast spielen</button>
+          </div>
+        );
+    }
+  };
+
+  return <div>{renderContent()}</div>;
 }
 
-export default App
+export default App;
