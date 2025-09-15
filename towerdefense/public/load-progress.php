@@ -19,11 +19,11 @@ error_reporting(E_ALL);
 
 // Datenbank-Zugangsdaten
 $servername = "localhost";
-$username_db = "d044c145";
-$password_db = "D1h8D1h8D1h8!";
+$username = "d044c145";
+$password = "D1h8D1h8D1h8!";
 $dbname = "d044c145";
 
-$conn = new mysqli($servername, $username_db, $password_db, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Datenbankverbindung fehlgeschlagen."]);
