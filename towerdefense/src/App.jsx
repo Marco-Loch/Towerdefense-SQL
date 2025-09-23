@@ -55,7 +55,7 @@ function App() {
     }
   };
 
-  return <div>{renderContent()}</div>;
+  return <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>{renderContent()}</div>;
 }
 
 export default App;

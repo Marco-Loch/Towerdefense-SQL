@@ -1,5 +1,8 @@
 import React, {useState, useEffect} from "react";
+import {Box} from "@mui/material";
 import MainScreen from "../Main-Screen/Main-Screen";
+import TowerDevelopment from "./Tower-Development";
+import type {ProgressData} from "../../types/progress";
 
 // TypeScript-Schnittstelle für die Props der Komponente
 interface GamePageProps {
@@ -7,18 +10,34 @@ interface GamePageProps {
   onLogout: () => void;
 }
 
-// TypeScript-Schnittstelle für die Spielfortschrittsdaten
-interface ProgressData {
-  xp: number;
-  currency: number;
-  highscore: number;
-  completed_levels: string | null;
-}
-
 function GamePage({userId, onLogout}: GamePageProps) {
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [message, setMessage] = useState("");
   const [currentScreen, setCurrentScreen] = useState<"loading" | "main" | "game" | "development">("loading");
+  const [username, setUsername] = useState<string>("");
+
+  const handleSaveProgress = async (updatedProgress: any) => {
+    setProgress(updatedProgress);
+    // Sende die Daten an das Backend
+    try {
+      const response = await fetch("https://towerdefense.marco-loch.de/api/save-progress.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          user_id: userId,
+          xp: updatedProgress.xp,
+          currency: updatedProgress.currency,
+          highscore: updatedProgress.highscore,
+          completed_levels: updatedProgress.completed_levels,
+          tower_levels: updatedProgress.tower_levels, // Füge die neuen Daten hinzu
+        }),
+      });
+      const result = await response.json();
+      setMessage(result.message);
+    } catch (error) {
+      setMessage("Fehler beim Speichern.");
+    }
+  };
 
   useEffect(() => {
     const loadProgress = async () => {
@@ -27,21 +46,21 @@ function GamePage({userId, onLogout}: GamePageProps) {
         setCurrentScreen("main");
         return;
       }
-
       try {
         const response = await fetch("https://towerdefense.marco-loch.de/api/load-progress.php", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: {"Content-Type": "application/json"},
           body: JSON.stringify({user_id: userId}),
         });
 
         const result = await response.json();
-
         if (result.success) {
           setProgress(result.progress);
           setMessage(result.message);
+          // <-- Benutzernamen hier setzen
+          if (result.username) {
+            setUsername(result.username);
+          }
         } else {
           setMessage(result.message);
         }
@@ -49,11 +68,12 @@ function GamePage({userId, onLogout}: GamePageProps) {
         console.error("Fehler beim Laden des Fortschritts:", error);
         setMessage("Fehler beim Laden des Fortschritts.");
       } finally {
-        // Unabhängig vom Ergebnis zum Hauptbildschirm wechseln
         setCurrentScreen("main");
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
       }
     };
-
     loadProgress();
   }, [userId]);
 
@@ -72,15 +92,23 @@ function GamePage({userId, onLogout}: GamePageProps) {
   const renderScreen = () => {
     if (!progress) {
       return (
-        <div>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+          }}
+        >
           <p>{message || "Lade Spielfortschritt..."}</p>
-        </div>
+        </Box>
       );
     }
 
     switch (currentScreen) {
       case "main":
-        return <MainScreen progress={progress} onStartGame={handleStartGame} onShowDevelopment={handleShowDevelopment} />;
+        return <MainScreen username={username} progress={progress} onStartGame={handleStartGame} onShowDevelopment={handleShowDevelopment} />;
       case "game":
         return (
           <div>
@@ -90,24 +118,25 @@ function GamePage({userId, onLogout}: GamePageProps) {
           </div>
         );
       case "development":
-        return (
-          <div>
-            <h1>Hier kommt der Turm-Entwicklungs-Bildschirm</h1>
-            <button onClick={handleBackToMain}>Zurück zum Hauptmenü</button>
-            {/* Hier wird die TowerDevelopment-Komponente gerendert */}
-          </div>
-        );
+        return <TowerDevelopment username={username} progress={progress} onBackToMain={handleBackToMain} onSaveProgress={handleSaveProgress} />;
       default:
         return <div>Unerwarteter Fehler.</div>;
     }
   };
 
   return (
-    <div>
-      <p>{message}</p>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100vh",
+        overflowX: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {renderScreen()}
       <button onClick={onLogout}>Abmelden</button>
-    </div>
+    </Box>
   );
 }
 

@@ -1,36 +1,87 @@
 import React from "react";
-
-// TypeScript-Schnittstelle
-interface ProgressData {
-  xp: number;
-  currency: number;
-  highscore: number;
-  completed_levels: string | null;
-}
+import {Box, Typography, Button, Paper} from "@mui/material";
+import PlayerHeader from "./Player-Header";
+import type {ProgressData} from "../../types/progress";
 
 interface MainScreenProps {
+  username: string;
   progress: ProgressData;
   onStartGame: () => void;
   onShowDevelopment: () => void;
 }
-//////////////////////
 
-function MainScreen({progress, onStartGame, onShowDevelopment}: MainScreenProps) {
+function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainScreenProps) {
+  const playerName = "Player 1";
+  const playerLevel = Math.floor(progress.xp / 1000) + 1;
+  const currentLevel = 1;
+
   return (
-    <div>
-      <h1>Hauptmenü</h1>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        width: "100%",
+        bgcolor: "#fff",
+      }}
+    >
+      <PlayerHeader playerName={username} currency={progress.currency} playerLevel={playerLevel} highscore={progress.highscore} ranking="N/A" />
 
-      <h3>Dein Spielfortschritt:</h3>
-      <p>Erfahrungspunkte (XP): {progress.xp}</p>
-      <p>Währung: {progress.currency}</p>
-      <p>Highscore: {progress.highscore}</p>
-      <p>Abgeschlossene Level: {progress.completed_levels ? progress.completed_levels : "Keine"}</p>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 4,
+        }}
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            width: "70%",
+            height: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            bgcolor: "#e0e0e0",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h5">Level-Bild (Platzhalter)</Typography>
+        </Paper>
+        <Typography variant="h6">LEVEL {currentLevel}</Typography>
+      </Box>
 
-      <button onClick={onStartGame}>Spielen</button>
-      <button onClick={onShowDevelopment}>Türme entwickeln</button>
-
-      {/* Hier kann später ein Level-Auswahl-Menü hinzugefügt werden */}
-    </div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          p: 2,
+          width: "100%",
+          bgcolor: "#f5f5f5",
+        }}
+      >
+        <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1}}>
+          Upgrades
+        </Button>
+        <Button variant="contained" size="large" onClick={onStartGame} sx={{mx: 1}}>
+          Play
+        </Button>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => {
+            /* TODO: Logik für Level-Auswahl */
+          }}
+          sx={{mx: 1}}
+        >
+          Level
+        </Button>
+      </Box>
+    </Box>
   );
 }
 
