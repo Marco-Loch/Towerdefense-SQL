@@ -16,7 +16,7 @@ function PlayerHeader({playerName, currency, playerLevel, highscore, ranking}: P
       sx={{
         width: "100%",
         height: "20vh",
-        bgcolor: "yellow",
+        bgcolor: "rgba(0, 0, 0, 0.05)",
         p: 2,
         boxSizing: "border-box",
         display: "flex",

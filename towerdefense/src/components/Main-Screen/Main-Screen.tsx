@@ -11,7 +11,7 @@ interface MainScreenProps {
 }
 
 function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainScreenProps) {
-  const playerName = "Player 1";
+  const PlayerName = "Guest";
   const playerLevel = Math.floor(progress.xp / 1000) + 1;
   const currentLevel = 1;
 
@@ -61,7 +61,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           alignItems: "center",
           p: 2,
           width: "100%",
-          bgcolor: "#f5f5f5",
+          bgcolor: "#fd8080ff",
         }}
       >
         <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1}}>
