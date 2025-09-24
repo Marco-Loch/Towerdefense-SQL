@@ -41,8 +41,8 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
         <Paper
           elevation={4}
           sx={{
-            width: "70%",
-            height: "50%",
+            maxWidth: "70%",
+            maxHeight: "70vh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -50,7 +50,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
             mb: 2,
           }}
         >
-          <img src={levelImage} alt="Level 1" style={{maxWidth: "100%", maxHeight: "100%"}} />
+          <img src={levelImage} alt="Level 1" style={{maxWidth: "100%", maxHeight: "100%", objectFit: "contain"}} />
         </Paper>
         <Typography variant="h6">LEVEL {currentLevel}</Typography>
       </Box>
