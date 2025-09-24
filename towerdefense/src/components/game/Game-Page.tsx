@@ -128,7 +128,7 @@ function GamePage({userId, onLogout}: GamePageProps) {
     <Box
       sx={{
         width: "100%",
-        minHeight: "100vh",
+        // minHeight: "100%",
         overflowX: "hidden",
         display: "flex",
         flexDirection: "column",

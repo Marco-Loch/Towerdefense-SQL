@@ -2,6 +2,7 @@ import React from "react";
 import {Box, Typography, Button, Paper} from "@mui/material";
 import PlayerHeader from "./Player-Header";
 import type {ProgressData} from "../../types/progress";
+import levelImage from "../../assets/img/level/Level1.png";
 
 interface MainScreenProps {
   username: string;
@@ -49,7 +50,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
             mb: 2,
           }}
         >
-          <Typography variant="h5">Level-Bild (Platzhalter)</Typography>
+          <img src={levelImage} alt="Level 1" style={{maxWidth: "100%", maxHeight: "100%"}} />
         </Paper>
         <Typography variant="h6">LEVEL {currentLevel}</Typography>
       </Box>
@@ -61,7 +62,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           alignItems: "center",
           p: 2,
           width: "100%",
-          bgcolor: "#fd8080ff",
+          bgcolor: "#e3e3e3ff",
         }}
       >
         <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1}}>
