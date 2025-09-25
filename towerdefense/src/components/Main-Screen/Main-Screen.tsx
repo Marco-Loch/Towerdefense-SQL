@@ -23,7 +23,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
         flexDirection: "column",
         height: "100vh",
         width: "100%",
-        bgcolor: "#fff",
+        bgcolor: "rgba(145, 145, 145, 1)",
       }}
     >
       <PlayerHeader playerName={username} currency={progress.currency} playerLevel={playerLevel} highscore={progress.highscore} ranking="N/A" />
@@ -36,6 +36,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           justifyContent: "center",
           alignItems: "center",
           p: 4,
+          bgcolor: "rgba(40, 40, 40, 1)",
         }}
       >
         <Paper
@@ -46,11 +47,13 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            bgcolor: "#e0e0e0",
+            bgcolor: "rgba(145, 145, 145, 1)",
             mb: 2,
+            borderRadius: "20%",
+            overflow: "hidden",
           }}
         >
-          <img src={levelImage} alt="Level 1" style={{maxWidth: "100%", maxHeight: "100%", objectFit: "contain"}} />
+          <img src={levelImage} alt="Level" style={{maxWidth: "100%", maxHeight: "100%", objectFit: "contain"}} />
         </Paper>
         <Typography variant="h6">LEVEL {currentLevel}</Typography>
       </Box>
@@ -58,17 +61,20 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-around",
+          justifyContent: "center",
           alignItems: "center",
-          p: 2,
+          padding: 0,
+          paddingTop: 2,
+          paddingBottom: 2,
           width: "100%",
-          bgcolor: "#e3e3e3ff",
+          bgcolor: "rgba(145, 145, 145, 1)",
+          gap: 2,
         }}
       >
-        <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1}}>
+        <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1, width: "20%"}}>
           Upgrades
         </Button>
-        <Button variant="contained" size="large" onClick={onStartGame} sx={{mx: 1}}>
+        <Button variant="contained" size="large" onClick={onStartGame} sx={{mx: 1, width: "20%"}}>
           Play
         </Button>
         <Button
@@ -77,7 +83,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           onClick={() => {
             /* TODO: Logik für Level-Auswahl */
           }}
-          sx={{mx: 1}}
+          sx={{mx: 1, width: "20%"}}
         >
           Level
         </Button>

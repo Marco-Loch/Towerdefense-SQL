@@ -3,6 +3,7 @@ import {Box} from "@mui/material";
 import MainScreen from "../Main-Screen/Main-Screen";
 import TowerDevelopment from "./Tower-Development";
 import type {ProgressData} from "../../types/progress";
+import Game from "./Game";
 
 // TypeScript-Schnittstelle für die Props der Komponente
 interface GamePageProps {
@@ -112,9 +113,7 @@ function GamePage({userId, onLogout}: GamePageProps) {
       case "game":
         return (
           <div>
-            <h1>Das Spiel wird hier gerendert</h1>
-            <button onClick={handleBackToMain}>Zurück zum Hauptmenü</button>
-            {/* Hier wird später die eigentliche Game-Komponente gerendert */}
+            <Game />
           </div>
         );
       case "development":
@@ -128,7 +127,7 @@ function GamePage({userId, onLogout}: GamePageProps) {
     <Box
       sx={{
         width: "100%",
-        // minHeight: "100%",
+        minHeight: "100%",
         overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
