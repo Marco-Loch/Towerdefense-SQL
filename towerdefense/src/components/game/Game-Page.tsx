@@ -58,7 +58,6 @@ function GamePage({userId, onLogout}: GamePageProps) {
         if (result.success) {
           setProgress(result.progress);
           setMessage(result.message);
-          // <-- Benutzernamen hier setzen
           if (result.username) {
             setUsername(result.username);
           }
@@ -113,7 +112,7 @@ function GamePage({userId, onLogout}: GamePageProps) {
       case "game":
         return (
           <div>
-            <Game />
+            <Game progress={progress} />
           </div>
         );
       case "development":

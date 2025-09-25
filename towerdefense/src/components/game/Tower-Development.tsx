@@ -3,6 +3,7 @@ import {Box, Button, Grid, Paper, Typography, Divider} from "@mui/material";
 import PlayerHeader from "../Main-Screen/Player-Header";
 import {ProgressData} from "../../types/progress";
 import {TOWER_DATA, UPGRADE_RATES, TowerInfo, UpgradeRates} from "../../data/towers/Regular-Tower-Data";
+import calculateUpgradeCost from "../../utils/upgrade-Costs";
 
 interface TowerDevelopmentProps {
   username: string;
@@ -26,7 +27,7 @@ function TowerDevelopment({username, progress, onBackToMain, onSaveProgress}: To
   const getUpgradeCost = (towerId: number, currentLevel: number): number => {
     const towerInfo = TOWER_DATA.find((t) => t.id === towerId);
     if (!towerInfo) return Infinity;
-    return towerInfo.baseCost * (currentLevel + 1);
+    return calculateUpgradeCost(towerInfo.baseCost, currentLevel);
   };
 
   const handleUpgrade = () => {

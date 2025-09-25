@@ -1,12 +1,26 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {Box} from "@mui/material";
 import GameCanvas from "./Game-Canvas";
 import LevelInfo from "./Level-Info";
 import Statistics from "./Statistics";
 import {LEVEL_DATA, SpawningConfig} from "../../data/levels/Level-Data";
-
+import type {ProgressData} from "../../types/progress";
 import {ENEMY_DATA, EnemyInfo} from "../../data/enemies/Enemy-Data";
-// import {TOWER_DATA} from "../../data/towerdata/Regular-Tower-Data";
+import {Enemy} from "../../utils/Enemy";
+import {TOWER_DATA} from "../../data/towers/Regular-Tower-Data";
+
+/**
+ * Funktion zur Berechnung der Spieler-HP basierend auf dem Level
+ * @param baseHP - Die Basis-HP des Spielers
+ * @param playerLevel - Das aktuelle Spielerlevel
+ * @returns Die berechnete HP
+ */
+function calculatePlayerHP(baseHP: number, playerLevel: number): number {
+  if (playerLevel <= 1) {
+    return baseHP;
+  }
+  return baseHP * Math.pow(1.05, playerLevel - 1);
+}
 
 interface RoundState {
   builtTowers: {slot: string; towerId: number; level: number; upgrades: any[]}[];
@@ -22,53 +36,90 @@ interface RoundState {
   playerHP: number;
 }
 
-const initialRoundState: RoundState = {
-  builtTowers: [],
-  roundStats: {
-    totalDamage: 0,
-    totalDamageTaken: 0,
-    totalKills: 0,
-    totalGold: 0,
-    totalPlayerXP: 0,
-    roundXP: 0,
-  },
-  currentRoundLevel: 1,
-  playerHP: 1000,
-};
-
 const TOWER_SLOTS = ["B", "D", "A", "E", "C"];
+const GAME_CANVAS_WIDTH = 500;
+const GAME_CANVAS_HEIGHT = 700;
 
-function Game() {
+interface GameProps {
+  progress: ProgressData;
+}
+
+function Game({progress}: GameProps) {
+  const playerLevel = Math.floor(progress.xp / 1000) + 1;
+  const initialPlayerHP = calculatePlayerHP(1000, playerLevel);
+
+  const initialRoundState: RoundState = {
+    builtTowers: [],
+    roundStats: {
+      totalDamage: 0,
+      totalDamageTaken: 0,
+      totalKills: 0,
+      totalGold: 0,
+      totalPlayerXP: 0,
+      roundXP: 0,
+    },
+    currentRoundLevel: 1,
+    playerHP: initialPlayerHP,
+  };
+
   const [roundState, setRoundState] = useState<RoundState>(initialRoundState);
   const [gameTime, setGameTime] = useState<number>(0);
-  const [spawnCounters, setSpawnCounters] = useState<Record<number, number>>({});
+  const [activeEnemies, setActiveEnemies] = useState<Enemy[]>([]);
+  const lastUpdateTime = useRef(performance.now());
+  const gameLoopRef = useRef<number>();
 
   useEffect(() => {
-    // Implementierung der Spielschleife
-    const gameLoop = setInterval(() => {
-      setGameTime((prevTime) => prevTime + 1);
+    const gameLoop = (timestamp: number) => {
+      const deltaTime = (timestamp - lastUpdateTime.current) / 1000;
+      lastUpdateTime.current = timestamp;
+
+      setGameTime((prevTime) => prevTime + deltaTime);
 
       const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
       if (!currentLevelData) return;
 
-      // Gegner-Spawning-Logik
-      currentLevelData.spawns.forEach((spawnConfig: SpawningConfig) => {
+      currentLevelData.spawns.forEach((spawnConfig) => {
         if (gameTime >= spawnConfig.spawnDelay) {
-          const currentSpawnInterval = spawnConfig.spawnInterval - Math.floor(gameTime / 15) * spawnConfig.spawnIncrease;
+          const currentSpawnInterval = Math.max(1, spawnConfig.spawnInterval - Math.floor(gameTime / 15) * spawnConfig.spawnIncrease);
 
-          if ((gameTime - spawnConfig.spawnDelay) % currentSpawnInterval === 0) {
-            console.log(`Spawning enemy ${spawnConfig.enemyId} at time ${gameTime}`);
+          if (
+            gameTime - spawnConfig.spawnDelay > 0 &&
+            Math.floor((gameTime - spawnConfig.spawnDelay) / currentSpawnInterval) !==
+              Math.floor((gameTime - spawnConfig.spawnDelay - deltaTime) / currentSpawnInterval)
+          ) {
+            const enemyInfo = ENEMY_DATA.find((e) => e.id === spawnConfig.enemyId);
+            if (enemyInfo) {
+              const startX = Math.random() * (GAME_CANVAS_WIDTH - 20) + 10;
+              const newEnemy = new Enemy(enemyInfo, startX, GAME_CANVAS_WIDTH, GAME_CANVAS_HEIGHT);
+              setActiveEnemies((prevEnemies) => [...prevEnemies, newEnemy]);
+            }
           }
         }
       });
 
-      if (roundState.currentRoundLevel >= currentLevelData.maxRounds) {
-        clearInterval(gameLoop);
+      setActiveEnemies((prevEnemies) => {
+        const updatedEnemies = prevEnemies
+          .map((enemy) => {
+            enemy.update(GAME_CANVAS_WIDTH, GAME_CANVAS_HEIGHT, deltaTime);
+            return enemy;
+          })
+          .filter((enemy) => enemy.status !== "destroyed");
+        return updatedEnemies;
+      });
+
+      if (roundState.currentRoundLevel < (currentLevelData.maxRounds || Infinity)) {
+        gameLoopRef.current = requestAnimationFrame(gameLoop);
+      } else {
         console.log("Maximum rounds reached. Remaining enemies must be defeated.");
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(gameLoop);
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+      }
+    };
   }, [gameTime, roundState.currentRoundLevel]);
 
   const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
@@ -79,10 +130,8 @@ function Game() {
   return (
     <Box sx={{display: "flex", flexDirection: "column", height: "100vh", bgcolor: "#000000ff", p: 2, boxSizing: "border-box"}}>
       <Box sx={{flexGrow: 1, display: "flex", gap: 2}}>
-        {/* Linke Spalte: Statistik */}
         <Statistics roundStats={roundState.roundStats} builtTowers={roundState.builtTowers} />
 
-        {/* Mittlere Spalte: Spielfeld */}
         <Box
           sx={{
             width: "33.33%",
@@ -91,10 +140,9 @@ function Game() {
             borderRadius: 2,
           }}
         >
-          <GameCanvas playerHP={roundState.playerHP} towerSlots={TOWER_SLOTS} />
+          <GameCanvas playerHP={roundState.playerHP} towerSlots={TOWER_SLOTS} activeEnemies={activeEnemies} />
         </Box>
 
-        {/* Rechte Spalte: Level-Info */}
         <LevelInfo currentRoundLevel={roundState.currentRoundLevel} enemyTypes={enemiesInThisLevel} />
       </Box>
     </Box>
