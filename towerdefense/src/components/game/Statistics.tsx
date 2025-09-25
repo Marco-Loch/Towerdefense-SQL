@@ -1,6 +1,6 @@
 import React from "react";
 import {Box, Paper, Typography, Button, Grid} from "@mui/material";
-import {TOWER_DATA} from "../../data/towerdata/Regular-Tower-Data";
+import {TOWER_DATA} from "../../data/towers/Regular-Tower-Data";
 
 interface TowerStats {
   slot: string;

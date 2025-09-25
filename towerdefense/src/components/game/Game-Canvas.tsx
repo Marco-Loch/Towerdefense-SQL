@@ -75,7 +75,7 @@ function GameCanvas({playerHP, towerSlots}: GameCanvasProps) {
     return () => window.removeEventListener("resize", setCanvasDimensions);
   }, [towerSlots]); // Abhängigkeit von towerSlots, damit die Türme sich bei Änderungen aktualisieren
 
-  return <canvas ref={canvasRef} style={{width: "100%", height: "100%", display: "block"}} />;
+  return <canvas ref={canvasRef} style={{width: "100%", height: "100%", display: "block", borderRadius: 10}} />;
 }
 
 export default GameCanvas;

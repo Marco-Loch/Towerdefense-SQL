@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Box, Button, Grid, Paper, Typography, Divider} from "@mui/material";
 import PlayerHeader from "../Main-Screen/Player-Header";
 import {ProgressData} from "../../types/progress";
-import {TOWER_DATA, UPGRADE_RATES, TowerInfo, UpgradeRates} from "../../data/towerdata/Regular-Tower-Data";
+import {TOWER_DATA, UPGRADE_RATES, TowerInfo, UpgradeRates} from "../../data/towers/Regular-Tower-Data";
 
 interface TowerDevelopmentProps {
   username: string;

@@ -1,19 +1,10 @@
 import React from "react";
-import {Box, Paper, Typography, Grid, Divider} from "@mui/material";
-
-// Importiere die Bilder
-
-interface EnemyType {
-  name: string;
-  hp: number;
-  img: string;
-  damage: number;
-  killcount: number;
-}
+import {Box, Paper, Typography, Grid} from "@mui/material";
+import type {EnemyInfo} from "../../data/enemies/Enemy-Data";
 
 interface LevelInfoProps {
   currentRoundLevel: number;
-  enemyTypes: EnemyType[];
+  enemyTypes: EnemyInfo[];
 }
 
 function LevelInfo({currentRoundLevel, enemyTypes}: LevelInfoProps) {
@@ -55,13 +46,13 @@ function LevelInfo({currentRoundLevel, enemyTypes}: LevelInfoProps) {
             </Typography>
             <Grid container spacing={1}>
               <Grid item xs={6}>
-                <Typography variant="body2">HP: {enemy.hp}</Typography>
+                <Typography variant="body2">Hitpoints: {enemy.health}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2"></Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="body2">Damage: {enemy.damage}</Typography>
+                <Typography variant="body2">Damage dealt: {enemy.damageDealt}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">Killcount: {enemy.killcount}</Typography>
