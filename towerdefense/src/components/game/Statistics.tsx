@@ -125,7 +125,7 @@ function Statistics({roundStats, builtTowers}: StatisticsProps) {
           <Typography variant="h5">SCORE</Typography>
           <Typography variant="h4">{score}</Typography>
         </Paper>
-        <Button variant="contained" color="primary" sx={{width: "100%"}}>
+        <Button variant="contained" color="primary" sx={{borderRadius: 2, width: "100%", bgcolor: "rgba(40, 40, 40, 1)"}}>
           EXIT
         </Button>
       </Box>

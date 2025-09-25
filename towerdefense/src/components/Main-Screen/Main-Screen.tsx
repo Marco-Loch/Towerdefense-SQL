@@ -71,10 +71,15 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           gap: 2,
         }}
       >
-        <Button variant="contained" size="large" onClick={onShowDevelopment} sx={{mx: 1, width: "20%"}}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={onShowDevelopment}
+          sx={{mx: 1, borderRadius: 2, bgcolor: "rgba(40, 40, 40, 1)", width: "20%"}}
+        >
           Upgrades
         </Button>
-        <Button variant="contained" size="large" onClick={onStartGame} sx={{mx: 1, width: "20%"}}>
+        <Button variant="contained" size="large" onClick={onStartGame} sx={{mx: 1, borderRadius: 2, bgcolor: "rgba(40, 40, 40, 1)", width: "20%"}}>
           Play
         </Button>
         <Button
@@ -83,7 +88,7 @@ function MainScreen({username, progress, onStartGame, onShowDevelopment}: MainSc
           onClick={() => {
             /* TODO: Logik für Level-Auswahl */
           }}
-          sx={{mx: 1, width: "20%"}}
+          sx={{mx: 1, borderRadius: 2, bgcolor: "rgba(40, 40, 40, 1)", width: "20%"}}
         >
           Level
         </Button>
