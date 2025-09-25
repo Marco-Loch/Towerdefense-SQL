@@ -1,3 +1,5 @@
+import {RegularTowerData} from "../towers/Tower-Data";
+
 export enum CardType {
   TowerCard = "TowerCard",
   UpgradeCard = "UpgradeCard",

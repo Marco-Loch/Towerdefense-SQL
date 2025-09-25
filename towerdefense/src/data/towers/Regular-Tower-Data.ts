@@ -13,6 +13,7 @@ export interface TowerInfo {
   damage: number;
   aoe: number | string;
   baseCost: number;
+  image: string;
 }
 
 export interface UpgradeRates {
@@ -36,6 +37,7 @@ export const TOWER_DATA: TowerInfo[] = [
     damage: 10.0,
     aoe: "None",
     baseCost: 50,
+    image: rapidFireTowerImg,
   },
   {
     id: 2,
@@ -49,6 +51,7 @@ export const TOWER_DATA: TowerInfo[] = [
     damage: 300.0,
     aoe: 20,
     baseCost: 50,
+    image: rocketTowerImg,
   },
   // Hier kannst du die restlichen Türme hinzufügen
 ];

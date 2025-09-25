@@ -4,6 +4,8 @@ import PlayerHeader from "../Main-Screen/Player-Header";
 import {ProgressData} from "../../types/progress";
 import {TOWER_DATA, UPGRADE_RATES, TowerInfo, UpgradeRates} from "../../data/towers/Regular-Tower-Data";
 import calculateUpgradeCost from "../../utils/upgrade-Costs";
+import rapidFireTowerImg from "../../assets/img/towers/rapid-fire-tower.png";
+import rocketTowerImg from "../../assets/img/towers/rocket-tower.png";
 
 interface TowerDevelopmentProps {
   username: string;
@@ -74,7 +76,9 @@ function TowerDevelopment({username, progress, onBackToMain, onSaveProgress}: To
                   sx={{
                     cursor: "pointer",
                     p: 2,
-                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    borderRadius: 5,
                     border: selectedTower?.id === tower.id ? "2px solid" : "none",
                     borderColor: "primary.main",
                     transition: "transform 0.2s",
@@ -83,9 +87,25 @@ function TowerDevelopment({username, progress, onBackToMain, onSaveProgress}: To
                     },
                   }}
                 >
-                  <Typography variant="h6">{tower.name}</Typography>
-                  <Typography variant="body2">Level: {towerLevels[tower.id] || 0}</Typography>
-                  <Typography variant="body2">Cost: {getUpgradeCost(tower.id, towerLevels[tower.id] || 0)}</Typography>
+                  {/* Bild links */}
+                  <Box
+                    component="img"
+                    src={tower.image}
+                    alt={tower.name}
+                    sx={{
+                      width: "60px",
+                      height: "60px",
+                      objectFit: "contain",
+                      mr: 2,
+                    }}
+                  />
+
+                  {/* Text rechts */}
+                  <Box sx={{textAlign: "left"}}>
+                    <Typography variant="h6">{tower.name}</Typography>
+                    <Typography variant="body2">Level: {towerLevels[tower.id] || 0}</Typography>
+                    <Typography variant="body2">Cost: {getUpgradeCost(tower.id, towerLevels[tower.id] || 0).toFixed(2)}</Typography>
+                  </Box>
                 </Paper>
               </Grid>
             ))}
@@ -131,7 +151,7 @@ function TowerDevelopment({username, progress, onBackToMain, onSaveProgress}: To
                       </Box>
                     </Paper>
                   </Grid>
-                  {/* ... weitere Stats nach dem gleichen Muster */}
+
                   <Grid item xs={12}>
                     <Paper sx={{p: 2, display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                       <Typography variant="body1">Speed:</Typography>
@@ -225,7 +245,7 @@ function TowerDevelopment({username, progress, onBackToMain, onSaveProgress}: To
                     }}
                     onClick={handleUpgrade}
                   >
-                    {getUpgradeCost(selectedTower.id, towerLevels[selectedTower.id] || 0)}
+                    {getUpgradeCost(selectedTower.id, towerLevels[selectedTower.id] || 0).toFixed(2)}
                   </Button>
                 </Box>
               </>
