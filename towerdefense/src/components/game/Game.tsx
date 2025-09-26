@@ -4,36 +4,18 @@ import GameCanvas from "./Game-Canvas";
 import LevelInfo from "./Level-Info";
 import Statistics from "./Statistics";
 import {LEVEL_DATA, SpawningConfig} from "../../data/levels/Level-Data";
-import type {ProgressData} from "../../types/progress";
 import {ENEMY_DATA, EnemyInfo} from "../../data/enemies/Enemy-Data";
 import {Enemy} from "../../utils/Enemy";
-import {TOWER_DATA} from "../../data/towers/Regular-Tower-Data";
+import {Card, ALL_CARDS} from "../../data/cards/Card-Data";
+import CardSelection from "./Card-Selection";
+import type {ProgressData} from "../../types/progress";
 
-/**
- * Funktion zur Berechnung der Spieler-HP basierend auf dem Level
- * @param baseHP - Die Basis-HP des Spielers
- * @param playerLevel - Das aktuelle Spielerlevel
- * @returns Die berechnete HP
- */
+// Funktion zur Berechnung der Spieler-HP
 function calculatePlayerHP(baseHP: number, playerLevel: number): number {
   if (playerLevel <= 1) {
     return baseHP;
   }
   return baseHP * Math.pow(1.05, playerLevel - 1);
-}
-
-interface RoundState {
-  builtTowers: {slot: string; towerId: number; level: number; upgrades: any[]}[];
-  roundStats: {
-    totalDamage: number;
-    totalDamageTaken: number;
-    totalKills: number;
-    totalGold: number;
-    totalPlayerXP: number;
-    roundXP: number;
-  };
-  currentRoundLevel: number;
-  playerHP: number;
 }
 
 const TOWER_SLOTS = ["B", "D", "A", "E", "C"];
@@ -48,7 +30,7 @@ function Game({progress}: GameProps) {
   const playerLevel = Math.floor(progress.xp / 1000) + 1;
   const initialPlayerHP = calculatePlayerHP(1000, playerLevel);
 
-  const initialRoundState: RoundState = {
+  const initialRoundState = {
     builtTowers: [],
     roundStats: {
       totalDamage: 0,
@@ -62,14 +44,50 @@ function Game({progress}: GameProps) {
     playerHP: initialPlayerHP,
   };
 
-  const [roundState, setRoundState] = useState<RoundState>(initialRoundState);
+  const [roundState, setRoundState] = useState<typeof initialRoundState>(initialRoundState);
   const [gameTime, setGameTime] = useState<number>(0);
   const [activeEnemies, setActiveEnemies] = useState<Enemy[]>([]);
   const lastUpdateTime = useRef(performance.now());
   const gameLoopRef = useRef<number>();
 
+  // Neue Zustände für das Kartensystem
+  const [roundXP, setRoundXP] = useState(0);
+  const [roundLevel, setRoundLevel] = useState(1);
+  const [showCardSelection, setShowCardSelection] = useState(false);
+  const [cardsToChoose, setCardsToChoose] = useState<Card[]>([]);
+  const [isPaused, setIsPaused] = useState(false); // NEU: Spiel Pausen-Zustand
+
+  // Funktion zum Ziehen von 3 zufälligen Karten
+  const drawRandomCards = (): Card[] => {
+    const shuffled = [...ALL_CARDS].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
+
+  // Wird aufgerufen, wenn der Spieler eine Karte wählt
+  const handleCardSelected = (selectedCard: Card) => {
+    console.log(`Karte "${selectedCard.name}" ausgewählt!`);
+    // TODO: Hier die Logik zum Anwenden des Karteneffekts implementieren
+    // ...
+    // Nachdem die Karte verarbeitet wurde, das Spiel fortsetzen
+    setShowCardSelection(false);
+    setIsPaused(false);
+  };
+
+  useEffect(() => {
+    // Initiales Karten-Modal bei Spielstart anzeigen
+    setShowCardSelection(true);
+    setCardsToChoose(drawRandomCards());
+    setIsPaused(true); // Spiel sofort pausieren
+  }, []);
+
   useEffect(() => {
     const gameLoop = (timestamp: number) => {
+      // Wenn das Spiel pausiert ist, einfach den nächsten Frame anfordern und die Logik überspringen
+      if (isPaused) {
+        gameLoopRef.current = requestAnimationFrame(gameLoop);
+        return;
+      }
+
       const deltaTime = (timestamp - lastUpdateTime.current) / 1000;
       lastUpdateTime.current = timestamp;
 
@@ -78,6 +96,17 @@ function Game({progress}: GameProps) {
       const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
       if (!currentLevelData) return;
 
+      // Logik für Level-Aufstieg basierend auf XP
+      const xpNeededForNextLevel = roundLevel * 100; // Beispiel: 100 XP pro Level
+      if (roundXP >= xpNeededForNextLevel && roundLevel < 20) {
+        setRoundLevel((prevLevel) => prevLevel + 1);
+        setRoundXP((prevXP) => prevXP - xpNeededForNextLevel);
+        setShowCardSelection(true);
+        setCardsToChoose(drawRandomCards());
+        setIsPaused(true); // Spiel pausieren, um Kartenauswahl zu ermöglichen
+      }
+
+      // Gegnerspawning-Logik
       currentLevelData.spawns.forEach((spawnConfig) => {
         if (gameTime >= spawnConfig.spawnDelay) {
           const currentSpawnInterval = Math.max(1, spawnConfig.spawnInterval - Math.floor(gameTime / 15) * spawnConfig.spawnIncrease);
@@ -97,6 +126,7 @@ function Game({progress}: GameProps) {
         }
       });
 
+      // Update der Gegnerpositionen
       setActiveEnemies((prevEnemies) => {
         const updatedEnemies = prevEnemies
           .map((enemy) => {
@@ -120,7 +150,7 @@ function Game({progress}: GameProps) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameTime, roundState.currentRoundLevel]);
+  }, [gameTime, roundState.currentRoundLevel, isPaused]); // Abhängigkeit von isPaused hinzufügen
 
   const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
   const enemiesInThisLevel = currentLevelData
@@ -145,6 +175,7 @@ function Game({progress}: GameProps) {
 
         <LevelInfo currentRoundLevel={roundState.currentRoundLevel} enemyTypes={enemiesInThisLevel} />
       </Box>
+      {showCardSelection && <CardSelection availableCards={cardsToChoose} onCardSelected={handleCardSelected} />}
     </Box>
   );
 }
