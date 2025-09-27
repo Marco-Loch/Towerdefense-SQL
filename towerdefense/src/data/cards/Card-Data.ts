@@ -1,20 +1,17 @@
 // src/data/cards/Card-Data.ts
 import {RegularTowerData} from "../towerdata/Regular-Tower-Data";
 
-// Base interface for all cards
 export interface BaseCard {
   id: number;
   name: string;
   img: string;
 }
 
-// Interface for a Tower Card
 export interface TowerCard extends BaseCard {
   type: "tower";
   towerId: number;
 }
 
-// Interface for an Upgrade Card
 export interface UpgradeCard extends BaseCard {
   type: "upgrade";
   upgradeType: "damage" | "attackSpeed" | "range" | "penetration" | "aoe" | "extraProjectile";
@@ -30,8 +27,6 @@ export interface MilestoneCard extends BaseCard {
 }
 
 export type Card = TowerCard | UpgradeCard | MilestoneCard;
-
-// --- Card Data  ---
 
 export const TOWER_CARDS: TowerCard[] = [
   {id: 1, name: "Rapid Fire Tower", img: "/img/cards/rft_card.png", type: "tower", towerId: 1},

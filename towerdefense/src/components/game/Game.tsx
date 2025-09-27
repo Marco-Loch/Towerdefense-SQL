@@ -3,7 +3,7 @@ import {Box} from "@mui/material";
 import GameCanvas from "./Game-Canvas";
 import LevelInfo from "./Level-Info";
 import Statistics from "./Statistics";
-import {LEVEL_DATA, SpawningConfig} from "../../data/levels/Level-Data";
+import {LEVEL_DATA} from "../../data/levels/Level-Data";
 import {ENEMY_DATA, EnemyInfo} from "../../data/enemies/Enemy-Data";
 import {Enemy} from "../../utils/Enemy";
 import {Card, ALL_CARDS} from "../../data/cards/Card-Data";
@@ -18,6 +18,21 @@ function calculatePlayerHP(baseHP: number, playerLevel: number): number {
   return baseHP * Math.pow(1.05, playerLevel - 1);
 }
 
+// Interface für den Runden-Zustand (RoundState)
+interface RoundState {
+  builtTowers: {slot: string; towerId: number; level: number; upgrades: any[]}[];
+  roundStats: {
+    totalDamage: number;
+    totalDamageTaken: number;
+    totalKills: number;
+    totalGold: number;
+    totalPlayerXP: number;
+    roundXP: number;
+  };
+  currentRoundLevel: number;
+  playerHP: number;
+}
+
 const TOWER_SLOTS = ["B", "D", "A", "E", "C"];
 const GAME_CANVAS_WIDTH = 500;
 const GAME_CANVAS_HEIGHT = 700;
@@ -30,7 +45,8 @@ function Game({progress}: GameProps) {
   const playerLevel = Math.floor(progress.xp / 1000) + 1;
   const initialPlayerHP = calculatePlayerHP(1000, playerLevel);
 
-  const initialRoundState = {
+  const initialRoundState: RoundState = {
+    // Nutzung des expliziten Interfaces
     builtTowers: [],
     roundStats: {
       totalDamage: 0,
@@ -44,29 +60,29 @@ function Game({progress}: GameProps) {
     playerHP: initialPlayerHP,
   };
 
-  const [roundState, setRoundState] = useState<typeof initialRoundState>(initialRoundState);
+  const [roundState, setRoundState] = useState<RoundState>(initialRoundState);
   const [gameTime, setGameTime] = useState<number>(0);
   const [activeEnemies, setActiveEnemies] = useState<Enemy[]>([]);
   const lastUpdateTime = useRef(performance.now());
   const gameLoopRef = useRef<number>();
 
-  // Neue Zustände für das Kartensystem
   const [roundXP, setRoundXP] = useState(0);
   const [roundLevel, setRoundLevel] = useState(1);
   const [showCardSelection, setShowCardSelection] = useState(false);
   const [cardsToChoose, setCardsToChoose] = useState<Card[]>([]);
-  const [isPaused, setIsPaused] = useState(false); // NEU: Spiel Pausen-Zustand
+  const [isPaused, setIsPaused] = useState(false);
 
-  // Funktion zum Ziehen von 3 zufälligen Karten
   const drawRandomCards = (): Card[] => {
+    // TODO: Später muss hier eine Logik rein, die nur verfügbare und sinnvolle Karten zieht.
     const shuffled = [...ALL_CARDS].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   };
 
-  // Wird aufgerufen, wenn der Spieler eine Karte wählt
   const handleCardSelected = (selectedCard: Card) => {
     console.log(`Karte "${selectedCard.name}" ausgewählt!`);
     // TODO: Hier die Logik zum Anwenden des Karteneffekts implementieren
+    // 1. applyCardEffect(selectedCard, roundState, setRoundState)
+    // 2. XP/Gold-Update, etc.
     // ...
     // Nachdem die Karte verarbeitet wurde, das Spiel fortsetzen
     setShowCardSelection(false);
@@ -77,12 +93,11 @@ function Game({progress}: GameProps) {
     // Initiales Karten-Modal bei Spielstart anzeigen
     setShowCardSelection(true);
     setCardsToChoose(drawRandomCards());
-    setIsPaused(true); // Spiel sofort pausieren
+    setIsPaused(true);
   }, []);
 
   useEffect(() => {
     const gameLoop = (timestamp: number) => {
-      // Wenn das Spiel pausiert ist, einfach den nächsten Frame anfordern und die Logik überspringen
       if (isPaused) {
         gameLoopRef.current = requestAnimationFrame(gameLoop);
         return;
@@ -97,16 +112,15 @@ function Game({progress}: GameProps) {
       if (!currentLevelData) return;
 
       // Logik für Level-Aufstieg basierend auf XP
-      const xpNeededForNextLevel = roundLevel * 100; // Beispiel: 100 XP pro Level
+      const xpNeededForNextLevel = roundLevel * 100;
       if (roundXP >= xpNeededForNextLevel && roundLevel < 20) {
         setRoundLevel((prevLevel) => prevLevel + 1);
         setRoundXP((prevXP) => prevXP - xpNeededForNextLevel);
         setShowCardSelection(true);
         setCardsToChoose(drawRandomCards());
-        setIsPaused(true); // Spiel pausieren, um Kartenauswahl zu ermöglichen
+        setIsPaused(true);
       }
 
-      // Gegnerspawning-Logik
       currentLevelData.spawns.forEach((spawnConfig) => {
         if (gameTime >= spawnConfig.spawnDelay) {
           const currentSpawnInterval = Math.max(1, spawnConfig.spawnInterval - Math.floor(gameTime / 15) * spawnConfig.spawnIncrease);
@@ -150,7 +164,7 @@ function Game({progress}: GameProps) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameTime, roundState.currentRoundLevel, isPaused]); // Abhängigkeit von isPaused hinzufügen
+  }, [gameTime, roundState.currentRoundLevel, isPaused]);
 
   const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
   const enemiesInThisLevel = currentLevelData
