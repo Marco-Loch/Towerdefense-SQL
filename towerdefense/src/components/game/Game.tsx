@@ -9,6 +9,7 @@ import {Enemy} from "../../utils/Enemy";
 import {Card, ALL_CARDS, TowerCard, UpgradeCard, MilestoneCard} from "../../data/cards/Card-Data";
 import CardSelection from "./Card-Selection";
 import type {ProgressData} from "../../types/progress";
+import {TOWER_DATA_MAP} from "../../data/towers/Regular-Tower-Data";
 
 function calculatePlayerHP(baseHP: number, playerLevel: number): number {
   if (playerLevel <= 1) {
@@ -53,7 +54,14 @@ interface RoundState {
   playerHP: number;
 }
 
-const TOWER_SLOTS = ["B", "D", "A", "E", "C"];
+// NEUE KONSTANTE: Definiert die Visuelle Reihenfolge auf dem Canvas (Links nach Rechts)
+// IHR WUNSCH: B (Links außen) -> D -> A (Mitte) -> E -> C (Rechts außen)
+const CANVAS_SLOTS = ["B", "D", "A", "E", "C"];
+
+// NEUE KONSTANTE: Definiert die Logische Bau-Priorität
+// IHR WUNSCH: 1. Mitte (A) -> 2. Links außen (B) -> 3. Rechts außen (C) -> 4. Links neben Mitte (D) -> 5. Rechts neben Mitte (E)
+const BUILD_PRIORITY_SLOTS = ["A", "B", "C", "D", "E"];
+
 const GAME_CANVAS_WIDTH = 500;
 const GAME_CANVAS_HEIGHT = 700;
 
@@ -92,14 +100,14 @@ function Game({progress}: GameProps) {
   const [isPaused, setIsPaused] = useState(false);
 
   const findFreeSlot = (towers: BuiltTower[]): string | undefined => {
-    const occupiedSlots = new Set(towers.map((t) => t.slot));
-    return TOWER_SLOTS.find((slot) => !occupiedSlots.has(slot));
+    const occupiedSlots = new Set(towers.map((t) => t.slot)); // WICHTIG: Nutzt die Logische Prioritätenliste für den Bauvorgang
+    return BUILD_PRIORITY_SLOTS.find((slot) => !occupiedSlots.has(slot));
   };
 
   const getAvailableCards = (builtTowers: BuiltTower[]): Card[] => {
     const availableCards: Card[] = [];
-    const occupiedSlotCount = builtTowers.length;
-    const isMaxTowers = occupiedSlotCount >= TOWER_SLOTS.length;
+    const occupiedSlotCount = builtTowers.length; // WICHTIG: Nutzt die CANVAS_SLOTS, um die maximale Anzahl an Türmen zu prüfen
+    const isMaxTowers = occupiedSlotCount >= CANVAS_SLOTS.length;
 
     for (const card of ALL_CARDS) {
       switch (card.type) {
@@ -176,8 +184,7 @@ function Game({progress}: GameProps) {
           },
           milestones: {lvl5: false, lvl10: false},
           upgrades: [],
-        };
-        //DEBUG
+        }; //DEBUG
         if (newTower.towerId === 1 && prevRoundState.builtTowers.length === 0) {
           newTower.level = 10;
           console.log("DEBUG: RFT temporär auf Level 10 gesetzt, um Milestone-Test zu ermöglichen.");
@@ -361,9 +368,9 @@ function Game({progress}: GameProps) {
 
   return (
     <Box sx={{display: "flex", flexDirection: "column", height: "100vh", bgcolor: "#000000ff", p: 2, boxSizing: "border-box"}}>
+           {" "}
       <Box sx={{flexGrow: 1, display: "flex", gap: 2, height: "100%"}}>
-        <Statistics roundStats={roundState.roundStats} builtTowers={roundState.builtTowers} />
-
+                <Statistics roundStats={roundState.roundStats} builtTowers={roundState.builtTowers} />       {" "}
         <Box
           sx={{
             width: "33.33%",
@@ -373,12 +380,19 @@ function Game({progress}: GameProps) {
             borderRadius: 2,
           }}
         >
-          <GameCanvas playerHP={roundState.playerHP} towerSlots={TOWER_SLOTS} activeEnemies={activeEnemies} />
+                   {" "}
+          <GameCanvas
+            playerHP={roundState.playerHP} // Übergabe der visuellen Reihenfolge an das Canvas
+            towerSlots={CANVAS_SLOTS}
+            activeEnemies={activeEnemies}
+            builtTowers={roundState.builtTowers}
+            towerDataMap={TOWER_DATA_MAP}
+          />
+                 {" "}
         </Box>
-
-        <LevelInfo currentRoundLevel={roundState.currentRoundLevel} enemyTypes={enemiesInThisLevel} />
+                <LevelInfo currentRoundLevel={roundState.currentRoundLevel} enemyTypes={enemiesInThisLevel} />     {" "}
       </Box>
-      {showCardSelection && <CardSelection availableCards={cardsToChoose} onCardSelected={handleCardSelected} />}
+            {showCardSelection && <CardSelection availableCards={cardsToChoose} onCardSelected={handleCardSelected} />}   {" "}
     </Box>
   );
 }

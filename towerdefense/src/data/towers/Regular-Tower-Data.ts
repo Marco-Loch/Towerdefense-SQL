@@ -1,6 +1,3 @@
-import rapidFireTowerImg from "../../assets/img/towers/rapid-fire-tower.png";
-import rocketTowerImg from "../../assets/img/towers/rocket-tower.png";
-
 export interface TowerInfo {
   id: number;
   name: string;
@@ -28,7 +25,7 @@ export const TOWER_DATA: TowerInfo[] = [
   {
     id: 1,
     name: "Rapid Fire Tower",
-    img: rapidFireTowerImg,
+    img: "/towers/rapid-fire-tower.png",
     projectile: "Bullets that fly quickly and directly at the target.",
     speed: 2, // shots per second
     range: 500,
@@ -37,12 +34,12 @@ export const TOWER_DATA: TowerInfo[] = [
     damage: 10.0,
     aoe: "None",
     baseCost: 50,
-    image: rapidFireTowerImg,
+    image: "/towers/rapid-fire-tower.png",
   },
   {
     id: 2,
     name: "Rocket Tower",
-    img: rocketTowerImg,
+    img: "/towers/rocket-tower.png",
     projectile: "Rockets that slowly fly on a homing arc towards the target.",
     speed: 0.3,
     range: 800,
@@ -51,7 +48,7 @@ export const TOWER_DATA: TowerInfo[] = [
     damage: 300.0,
     aoe: 20,
     baseCost: 50,
-    image: rocketTowerImg,
+    image: "/towers/rocket-tower.png",
   },
   // Hier kannst du die restlichen Türme hinzufügen
 ];
@@ -72,3 +69,8 @@ export const UPGRADE_RATES: UpgradeRates[] = [
     aoeIncrease: 0.05,
   },
 ];
+
+export const TOWER_DATA_MAP: Record<number, TowerInfo> = TOWER_DATA.reduce((map, tower) => {
+  map[tower.id] = tower;
+  return map;
+}, {} as Record<number, TowerInfo>);

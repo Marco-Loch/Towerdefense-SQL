@@ -1,7 +1,3 @@
-import smallMeteoriteImg from "../../assets/img/enemies/small-meteorite.png";
-import bigMeteoriteImg from "../../assets/img/enemies/big-meteorite.png";
-import alienScoutImg from "../../assets/img/enemies/alien-scout.png";
-
 export interface EnemyInfo {
   id: number;
   name: string;
@@ -30,7 +26,7 @@ export const ENEMY_DATA: EnemyInfo[] = [
   {
     id: 1,
     name: "Small Meteorite",
-    img: smallMeteoriteImg,
+    img: "/enemies/small-meteorite.png",
     health: 1000,
     damage: 10,
     movementSpeed: 20,
@@ -53,7 +49,7 @@ export const ENEMY_DATA: EnemyInfo[] = [
   {
     id: 2,
     name: "Big Meteorite",
-    img: bigMeteoriteImg,
+    img: "/enemies/big-meteorite.png",
     health: 2500,
     damage: 25,
     movementSpeed: 15,
@@ -76,7 +72,7 @@ export const ENEMY_DATA: EnemyInfo[] = [
   {
     id: 3,
     name: "Alien Scout",
-    img: alienScoutImg,
+    img: "/enemies/alien-scout.png",
     health: 5000,
     damage: 5,
     movementSpeed: 40,
