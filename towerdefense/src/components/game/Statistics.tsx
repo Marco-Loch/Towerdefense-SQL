@@ -1,5 +1,5 @@
 import React from "react";
-import {Box, Paper, Typography, Button, Grid} from "@mui/material";
+import {Box, Paper, Typography, Button} from "@mui/material";
 import {TOWER_DATA} from "../../data/towers/Regular-Tower-Data";
 
 interface TowerStats {
@@ -25,103 +25,146 @@ function Statistics({roundStats, builtTowers}: StatisticsProps) {
   const score = roundStats.totalDamageTaken > 0 ? Math.floor(roundStats.totalDamage / roundStats.totalDamageTaken) : roundStats.totalDamage;
 
   return (
-    <Box sx={{width: "33.33%", display: "flex", flexDirection: "column", gap: 2}}>
+    <Box
+      sx={{
+        width: "33.33%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        height: "100%", // ganze Spalte füllt Höhe
+      }}
+    >
       {/* Überschrift */}
-      <Paper elevation={4} sx={{p: 2, bgcolor: "rgba(145, 145, 145, 1)", borderRadius: 2, borderBottom: "1px solid black", width: "95%"}}>
+      <Paper
+        elevation={4}
+        sx={{
+          p: 2,
+          bgcolor: "rgba(145, 145, 145, 1)",
+          borderRadius: 2,
+          borderBottom: "1px solid black",
+          width: "95%",
+        }}
+      >
         <Typography variant="h5" align="center">
           STATISTICS
         </Typography>
       </Paper>
 
       {/* Hauptstatistiken */}
-      <Paper elevation={4} sx={{p: 2, bgcolor: "rgba(145, 145, 145, 1)", borderRadius: 2, width: "95%"}}>
-        <Box sx={{display: "flex", gap: 2, mb: 2}}>
+      <Paper
+        elevation={4}
+        sx={{
+          p: 2,
+          bgcolor: "rgba(145, 145, 145, 1)",
+          borderRadius: 2,
+          width: "95%",
+        }}
+      >
+        <Box sx={{display: "flex", gap: 2, mb: 1}}>
           {/* Linke Spalte */}
           <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column", gap: 1}}>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-              <Typography variant="body1">Damage:</Typography>
-              <Typography variant="body1">{roundStats.totalDamage}</Typography>
+              <Typography variant="body2">Damage:</Typography>
+              <Typography variant="body2">{roundStats.totalDamage}</Typography>
             </Box>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-              <Typography variant="body1">Round XP:</Typography>
-              <Typography variant="body1">{roundStats.roundXP}</Typography>
+              <Typography variant="body2">Round XP:</Typography>
+              <Typography variant="body2">{roundStats.roundXP}</Typography>
             </Box>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-              <Typography variant="body1">Gold earned:</Typography>
-              <Typography variant="body1">{roundStats.totalGold}</Typography>
+              <Typography variant="body2">Gold earned:</Typography>
+              <Typography variant="body2">{roundStats.totalGold}</Typography>
             </Box>
           </Box>
 
           {/* Rechte Spalte */}
           <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column", gap: 1}}>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-              <Typography variant="body1">Damage Taken:</Typography>
-              <Typography variant="body1">{roundStats.totalDamageTaken}</Typography>
+              <Typography variant="body2">Damage Taken:</Typography>
+              <Typography variant="body2">{roundStats.totalDamageTaken}</Typography>
             </Box>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-              <Typography variant="body1">Player XP:</Typography>
-              <Typography variant="body1">{roundStats.totalPlayerXP}</Typography>
+              <Typography variant="body2">Player XP:</Typography>
+              <Typography variant="body2">{roundStats.totalPlayerXP}</Typography>
             </Box>
-            {/* Leerer Platz, um das Layout der 3. Zeile auszugleichen */}
-            <Box></Box>
+            <Box />
           </Box>
         </Box>
       </Paper>
 
-      {/* Turm-Statistiken */}
-      {builtTowers.map((tower) => {
-        const towerInfo = TOWER_DATA.find((data) => data.id === tower.towerId);
-        if (!towerInfo) return null;
-        return (
-          <Paper
-            key={tower.slot}
-            elevation={4}
-            sx={{p: 2, bgcolor: "rgba(145, 145, 145, 1)", borderRadius: 2, display: "flex", alignItems: "center", gap: 2, width: "100%"}}
-          >
-            {/* Turmbild */}
-            <Box
+      {/* Turm-Statistiken mit Scroll */}
+      <Box sx={{flexGrow: 1, overflowY: "auto", pr: 1}}>
+        {builtTowers.map((tower) => {
+          const towerInfo = TOWER_DATA.find((data) => data.id === tower.towerId);
+          if (!towerInfo) return null;
+          return (
+            <Paper
+              key={tower.slot}
+              elevation={4}
               sx={{
-                flexShrink: 0,
-                width: 80,
-                height: 80,
-                borderRadius: "50%",
-                border: "1px solid grey",
+                p: 2,
+                mb: 2,
+                bgcolor: "rgba(145, 145, 145, 1)",
+                borderRadius: 2,
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
-                overflow: "hidden",
+                gap: 2,
               }}
             >
-              <img src={towerInfo.img} alt={towerInfo.name} style={{width: "95%", height: "100%", objectFit: "contain"}} />
-            </Box>
+              {/* Turmbild im Kreis */}
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  width: 70,
+                  height: 70,
+                  borderRadius: "50%",
+                  border: "1px solid grey",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "hidden",
+                  bgcolor: "white",
+                }}
+              >
+                <img src={towerInfo.img} alt={towerInfo.name} style={{width: "70%", height: "70%", objectFit: "contain"}} />
+              </Box>
 
-            {/* Textinfos */}
-            <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
-              <Typography variant="h6" sx={{textAlign: "center", mb: 1}}>
-                {towerInfo.name}
-              </Typography>
-              <Grid container spacing={1}>
-                <Grid item xs={6}>
-                  <Typography variant="body2">Damage:</Typography>
-                </Grid>
-                <Grid item xs={6} sx={{textAlign: "right"}}>
-                  <Typography variant="body2">{towerInfo.damage}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">Kills:</Typography>
-                </Grid>
-                <Grid item xs={6} sx={{textAlign: "right"}}>
-                  <Typography variant="body2">-</Typography>
-                </Grid>
-              </Grid>
-            </Box>
-          </Paper>
-        );
-      })}
+              {/* Textinfos */}
+              <Box sx={{flexGrow: 1}}>
+                <Typography variant="subtitle1" align="center">
+                  {towerInfo.name}
+                </Typography>
+                <Box sx={{display: "flex", justifyContent: "space-between", mt: 1}}>
+                  <Typography variant="body2">Damage: {towerInfo.damage}</Typography>
+                  <Typography variant="body2">Kills: -</Typography>
+                </Box>
+              </Box>
+            </Paper>
+          );
+        })}
+      </Box>
 
-      {/* SCORE-Box */}
-      <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", mt: "auto", gap: 2, width: "100%"}}>
-        <Paper elevation={4} sx={{p: 2, width: "95%", bgcolor: "rgba(145, 145, 145, 1)", textAlign: "center", borderRadius: 2}}>
+      {/* SCORE + EXIT fixiert unten */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mt: "auto",
+          gap: 2,
+          width: "100%",
+        }}
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            p: 2,
+            width: "95%",
+            bgcolor: "rgba(145, 145, 145, 1)",
+            textAlign: "center",
+            borderRadius: 2,
+          }}
+        >
           <Typography variant="h5">SCORE</Typography>
           <Typography variant="h4">{score}</Typography>
         </Paper>
