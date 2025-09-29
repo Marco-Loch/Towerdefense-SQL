@@ -1,12 +1,10 @@
 import React, {useRef, useEffect} from "react";
 import {Enemy} from "../../utils/Enemy";
 
-// Wir definieren die Props, die die Komponente von ihrem Elternteil erhalten wird
 interface GameCanvasProps {
   playerHP: number;
   towerSlots: string[];
   activeEnemies: Enemy[];
-  //   towerData: TOWER_DATA[];
 }
 
 const TOWER_HEIGHT = 60;
@@ -25,8 +23,22 @@ function GameCanvas({playerHP, towerSlots, activeEnemies}: GameCanvasProps) {
 
     const setCanvasDimensions = () => {
       if (canvas.parentElement) {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+
+        const displayWidth = canvas.parentElement.clientWidth;
+        const displayHeight = canvas.parentElement.clientHeight;
+
+        // interne Zeichenfläche in physikalischen Pixeln
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
+
+        // CSS-Größe in logischen Pixeln
+        canvas.style.width = `${displayWidth}px`;
+        canvas.style.height = `${displayHeight}px`;
+
+        // Skalierung zurück auf "logische" Einheiten
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset Transform
+        ctx.scale(dpr, dpr);
       }
     };
 
@@ -48,26 +60,29 @@ function GameCanvas({playerHP, towerSlots, activeEnemies}: GameCanvasProps) {
     loadImages();
 
     const gameLoop = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const displayWidth = canvas.clientWidth;
+      const displayHeight = canvas.clientHeight;
 
-      // Zeichne den Himmel und den Boden
+      ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+      // Himmel + Boden
       ctx.fillStyle = "#ADD8E6";
-      ctx.fillRect(0, 0, canvas.width, canvas.height - GROUND_HEIGHT);
+      ctx.fillRect(0, 0, displayWidth, displayHeight - GROUND_HEIGHT);
       ctx.fillStyle = "#8B4513";
-      ctx.fillRect(0, canvas.height - GROUND_HEIGHT, canvas.width, GROUND_HEIGHT);
+      ctx.fillRect(0, displayHeight - GROUND_HEIGHT, displayWidth, GROUND_HEIGHT);
 
-      // Zeichne die Lebensanzeige
-      const hpBarWidth = canvas.width * 0.4;
-      const hpBarX = (canvas.width - hpBarWidth) / 2;
-      const hpBarY = canvas.height - GROUND_HEIGHT + GROUND_HEIGHT / 2 - HEALTH_BAR_HEIGHT / 2;
+      // Lebensbalken
+      const hpBarWidth = displayWidth * 0.4;
+      const hpBarX = (displayWidth - hpBarWidth) / 2;
+      const hpBarY = displayHeight - GROUND_HEIGHT + GROUND_HEIGHT / 2 - HEALTH_BAR_HEIGHT / 2;
       ctx.fillStyle = "lightgreen";
       ctx.fillRect(hpBarX, hpBarY, hpBarWidth, HEALTH_BAR_HEIGHT);
 
-      // Zeichne die Türme
-      const towerSpacing = canvas.width / (towerSlots.length + 1);
+      // Türme
+      const towerSpacing = displayWidth / (towerSlots.length + 1);
       towerSlots.forEach((slot, index) => {
         const towerX = (index + 1) * towerSpacing;
-        const towerY = canvas.height - GROUND_HEIGHT - TOWER_HEIGHT / 2;
+        const towerY = displayHeight - GROUND_HEIGHT - TOWER_HEIGHT / 2;
 
         ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
         ctx.beginPath();
@@ -85,10 +100,11 @@ function GameCanvas({playerHP, towerSlots, activeEnemies}: GameCanvasProps) {
         ctx.fillText(slot, towerX, towerY + TOWER_HEIGHT / 2);
       });
 
+      // Gegner
       activeEnemies.forEach((enemy) => {
         const img = enemyImagesRef.current[enemy.enemyInfo.img];
         if (img && img.complete && img.naturalWidth !== 0) {
-          ctx.drawImage(img, enemy.x, enemy.y, 50, 50); // Beispielgröße: 50x50 Pixel
+          ctx.drawImage(img, enemy.x, enemy.y, 50, 50);
         }
       });
 
@@ -97,10 +113,12 @@ function GameCanvas({playerHP, towerSlots, activeEnemies}: GameCanvasProps) {
 
     gameLoop();
 
-    return () => window.removeEventListener("resize", setCanvasDimensions);
-  }, [towerSlots, activeEnemies]); // Abhängigkeit von towerSlots, damit die Türme sich bei Änderungen aktualisieren
+    return () => {
+      window.removeEventListener("resize", setCanvasDimensions);
+    };
+  }, [towerSlots, activeEnemies]);
 
-  return <canvas ref={canvasRef} style={{width: "100%", height: "100%", display: "block", borderRadius: 10}} />;
+  return <canvas ref={canvasRef} style={{display: "block", borderRadius: 10}} />;
 }
 
 export default GameCanvas;

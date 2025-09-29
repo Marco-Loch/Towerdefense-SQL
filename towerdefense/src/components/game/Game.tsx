@@ -10,7 +10,6 @@ import {Card, ALL_CARDS, TowerCard, UpgradeCard, MilestoneCard} from "../../data
 import CardSelection from "./Card-Selection";
 import type {ProgressData} from "../../types/progress";
 
-// Funktion zur Berechnung der Spieler-HP
 function calculatePlayerHP(baseHP: number, playerLevel: number): number {
   if (playerLevel <= 1) {
     return baseHP;
@@ -18,37 +17,30 @@ function calculatePlayerHP(baseHP: number, playerLevel: number): number {
   return baseHP * Math.pow(1.05, playerLevel - 1);
 }
 
-// NEUE INTERFACES FÜR KARTEN-UPGRADES
-// Struktur für einen gebauten Turm
 interface BuiltTower {
   slot: string;
   towerId: number;
-  level: number; // Turmlevel durch reguläre Upgrades (später: Persistenter Meta-Upgrade-Stand)
+  level: number;
 
-  // Kumulative Boni durch Upgrade-Karten (Temporäre In-Runden-Boni)
   cardUpgrades: {
-    damageMultiplier: number; // Startet bei 1.0. +30% Karte setzt auf 1.3
-    speedMultiplier: number; // Startet bei 1.0
-    rangeMultiplier: number; // Startet bei 1.0
-    aoeMultiplier: number; // Startet bei 1.0
-    penetrationBonus: number; // Flacher Wert, z.B. 0, +1, +2
-    extraProjectiles: number; // Flacher Wert, z.B. 0, +1
+    damageMultiplier: number;
+    speedMultiplier: number;
+    rangeMultiplier: number;
+    aoeMultiplier: number;
+    penetrationBonus: number;
+    extraProjectiles: number;
   };
 
-  // Meilenstein-Flags (Temporäre In-Runden-Boni)
   milestones: {
     lvl5: boolean;
     lvl10: boolean;
   };
 
-  // Hinzugefügt, um das 'TowerStats'-Interface in Statistics.tsx zu erfüllen und den Fehler zu beheben.
-  // Korrigiert von Record<string, any> auf any[], da Statistics.tsx ein Array erwartet.
   upgrades: any[];
 }
 
-// Interface für den Runden-Zustand (RoundState)
 interface RoundState {
-  builtTowers: BuiltTower[]; // Nutzt das neue BuiltTower Interface
+  builtTowers: BuiltTower[];
   roundStats: {
     totalDamage: number;
     totalDamageTaken: number;
@@ -73,7 +65,6 @@ function Game({progress}: GameProps) {
   const playerLevel = Math.floor(progress.xp / 1000) + 1;
   const initialPlayerHP = calculatePlayerHP(1000, playerLevel);
 
-  // Initialisierung der builtTowers mit der neuen Struktur
   const initialRoundState: RoundState = {
     builtTowers: [],
     roundStats: {
@@ -100,13 +91,11 @@ function Game({progress}: GameProps) {
   const [cardsToChoose, setCardsToChoose] = useState<Card[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Hilfsfunktion zum Finden eines freien Slots
   const findFreeSlot = (towers: BuiltTower[]): string | undefined => {
     const occupiedSlots = new Set(towers.map((t) => t.slot));
     return TOWER_SLOTS.find((slot) => !occupiedSlots.has(slot));
   };
 
-  // Funktion zur Ermittlung der verfügbaren Karten basierend auf dem Spielzustand
   const getAvailableCards = (builtTowers: BuiltTower[]): Card[] => {
     const availableCards: Card[] = [];
     const occupiedSlotCount = builtTowers.length;
@@ -115,7 +104,6 @@ function Game({progress}: GameProps) {
     for (const card of ALL_CARDS) {
       switch (card.type) {
         case "tower":
-          // Turmkarten: Nur verfügbar, wenn noch ein freier Slot existiert.
           if (!isMaxTowers) {
             availableCards.push(card);
           }
@@ -123,7 +111,6 @@ function Game({progress}: GameProps) {
 
         case "upgrade":
           const upgradeCard = card as UpgradeCard;
-          // Upgrade-Karten: Nur verfügbar, wenn ein Turm des Typs gebaut wurde.
           if (builtTowers.some((t) => t.towerId === upgradeCard.towerId)) {
             availableCards.push(card);
           }
@@ -131,7 +118,6 @@ function Game({progress}: GameProps) {
 
         case "milestone":
           const milestoneCard = card as MilestoneCard;
-          // Meilenstein-Karten: Nur verfügbar, wenn Turm gebaut, Level erreicht und Milestone nicht aktiv.
           const targetTower = builtTowers.find((t) => t.towerId === milestoneCard.towerId);
 
           if (targetTower) {
@@ -151,7 +137,6 @@ function Game({progress}: GameProps) {
           break;
 
         default:
-          // Andere Kartentypen (z.B. General Upgrades, die immer verfügbar sind)
           availableCards.push(card);
           break;
       }
@@ -160,15 +145,12 @@ function Game({progress}: GameProps) {
   };
 
   const drawRandomCards = (): Card[] => {
-    // Ruft die gefilterte Liste ab
     const availableCards = getAvailableCards(roundState.builtTowers);
 
-    // Wählt zufällig maximal 3 Karten aus den verfügbaren Karten
     const shuffled = [...availableCards].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   };
 
-  // Logik zur Anwendung des Karteneffekts
   const applyCardEffect = (card: Card, prevRoundState: RoundState): RoundState => {
     switch (card.type) {
       case "tower":
@@ -183,7 +165,7 @@ function Game({progress}: GameProps) {
         const newTower: BuiltTower = {
           slot: freeSlot,
           towerId: towerCard.towerId,
-          level: 1, // Startet auf Level 1
+          level: 1,
           cardUpgrades: {
             damageMultiplier: 1.0,
             speedMultiplier: 1.0,
@@ -195,8 +177,7 @@ function Game({progress}: GameProps) {
           milestones: {lvl5: false, lvl10: false},
           upgrades: [],
         };
-
-        // DEBUG: Temporär Level auf 10 setzen, um Milestone-Karten testen zu können
+        //DEBUG
         if (newTower.towerId === 1 && prevRoundState.builtTowers.length === 0) {
           newTower.level = 10;
           console.log("DEBUG: RFT temporär auf Level 10 gesetzt, um Milestone-Test zu ermöglichen.");
@@ -209,8 +190,6 @@ function Game({progress}: GameProps) {
 
       case "upgrade":
         const upgradeCard = card as UpgradeCard;
-        // Vorerst nehmen wir den ERSTEN gebauten Turm des Typs.
-        // TODO: Später: Spieler muss den Zielturm auswählen können.
         const targetUpgradeIndex = prevRoundState.builtTowers.findIndex((t) => t.towerId === upgradeCard.towerId);
 
         if (targetUpgradeIndex === -1) {
@@ -221,7 +200,6 @@ function Game({progress}: GameProps) {
         const updatedTowersUpgrade = [...prevRoundState.builtTowers];
         const targetTowerUpgrade = updatedTowersUpgrade[targetUpgradeIndex];
 
-        // Anwendung des Upgrades (kumulativ)
         switch (upgradeCard.upgradeType) {
           case "damage":
             targetTowerUpgrade.cardUpgrades.damageMultiplier += upgradeCard.value;
@@ -239,7 +217,6 @@ function Game({progress}: GameProps) {
             targetTowerUpgrade.cardUpgrades.penetrationBonus += upgradeCard.value;
             break;
           case "extraProjectile":
-            // RT Extra Rocket: +1 Projektil, -15% Schaden (value = -0.15)
             targetTowerUpgrade.cardUpgrades.extraProjectiles += 1;
             targetTowerUpgrade.cardUpgrades.damageMultiplier += upgradeCard.value;
             break;
@@ -252,7 +229,6 @@ function Game({progress}: GameProps) {
 
       case "milestone":
         const milestoneCard = card as MilestoneCard;
-        // Vorerst nehmen wir den ERSTEN gebauten Turm des Typs.
         const targetMilestoneIndex = prevRoundState.builtTowers.findIndex((t) => t.towerId === milestoneCard.towerId);
 
         if (targetMilestoneIndex === -1) {
@@ -265,19 +241,16 @@ function Game({progress}: GameProps) {
         const isLvl5 = milestoneCard.level === 5;
         const isLvl10 = milestoneCard.level === 10;
 
-        // 1. Level-Check
         if (targetTowerMilestone.level < milestoneCard.level) {
           console.warn(`Turm-Level ${targetTowerMilestone.level} ist zu niedrig für Milestone Lvl ${milestoneCard.level}.`);
           return prevRoundState;
         }
 
-        // 2. Check, ob Milestone bereits gesetzt
         if ((isLvl5 && targetTowerMilestone.milestones.lvl5) || (isLvl10 && targetTowerMilestone.milestones.lvl10)) {
           console.warn(`Milestone Lvl ${milestoneCard.level} bereits für diesen Turm aktiv.`);
           return prevRoundState;
         }
 
-        // 3. Milestone setzen
         if (isLvl5) {
           targetTowerMilestone.milestones.lvl5 = true;
         } else if (isLvl10) {
@@ -303,13 +276,11 @@ function Game({progress}: GameProps) {
       return applyCardEffect(selectedCard, prevRoundState);
     });
 
-    // Nachdem die Karte verarbeitet wurde, das Spiel fortsetzen
     setShowCardSelection(false);
     setIsPaused(false);
   };
 
   useEffect(() => {
-    // Initiales Karten-Modal bei Spielstart anzeigen
     setShowCardSelection(true);
     setCardsToChoose(drawRandomCards());
     setIsPaused(true);
@@ -330,7 +301,6 @@ function Game({progress}: GameProps) {
       const currentLevelData = LEVEL_DATA.find((level) => level.level === roundState.currentRoundLevel);
       if (!currentLevelData) return;
 
-      // Logik für Level-Aufstieg basierend auf XP
       const xpNeededForNextLevel = roundLevel * 100;
       if (roundXP >= xpNeededForNextLevel && roundLevel < 20) {
         setRoundLevel((prevLevel) => prevLevel + 1);
@@ -359,7 +329,6 @@ function Game({progress}: GameProps) {
         }
       });
 
-      // Update der Gegnerpositionen
       setActiveEnemies((prevEnemies) => {
         const updatedEnemies = prevEnemies
           .map((enemy) => {
@@ -392,12 +361,13 @@ function Game({progress}: GameProps) {
 
   return (
     <Box sx={{display: "flex", flexDirection: "column", height: "100vh", bgcolor: "#000000ff", p: 2, boxSizing: "border-box"}}>
-      <Box sx={{flexGrow: 1, display: "flex", gap: 2}}>
+      <Box sx={{flexGrow: 1, display: "flex", gap: 2, height: "100%"}}>
         <Statistics roundStats={roundState.roundStats} builtTowers={roundState.builtTowers} />
 
         <Box
           sx={{
             width: "33.33%",
+            height: "100%",
             position: "relative",
             border: "1px solid black",
             borderRadius: 2,
