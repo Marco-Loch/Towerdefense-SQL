@@ -27,7 +27,7 @@ export default function Game({progress}: GameProps) {
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const {gameTime, activeEnemies} = useGameLoop({
+  const {gameTime, activeEnemies, roundXP, roundLevel, setRoundXP, shots} = useGameLoop({
     roundState,
     isPaused,
     onLevelUp: () => {
@@ -76,6 +76,7 @@ export default function Game({progress}: GameProps) {
             activeEnemies={activeEnemies}
             builtTowers={roundState.builtTowers}
             towerDataMap={TOWER_DATA_MAP}
+            shots={shots}
           />
         </Box>
 

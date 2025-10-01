@@ -6,6 +6,7 @@ export interface BuiltTower {
   slot: string;
   towerId: number;
   level: number;
+  cooldown: number;
 
   cardUpgrades: {
     damageMultiplier: number;
@@ -82,6 +83,7 @@ export function useRoundState(progress: ProgressData) {
           slot: freeSlot,
           towerId: towerCard.towerId,
           level: 1,
+          cooldown: 1,
           cardUpgrades: {
             damageMultiplier: 1.0,
             speedMultiplier: 1.0,
